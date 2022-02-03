@@ -2,11 +2,12 @@ package common
 
 import (
 	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // create a mysql connection
 func NewMysqlConn() (db *sql.DB, err error) {
-	db, err = sql.Open("mysql", "root:imooc@tcp(127.0.0.1:3306)/imooc?charset=utf8")
+	db, err = sql.Open("mysql", "root:Yinmu.123@tcp(localhost:3306)/lightning?charset=utf8")
 	return
 }
 

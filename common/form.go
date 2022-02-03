@@ -40,7 +40,7 @@ type Error struct {
 }
 
 func (s *Error) Error() string {
-	return "lightnight: " + s.err.Error()
+	return "lightning: " + s.err.Error()
 }
 
 func (s Error) MarshalJSON() ([]byte, error) {

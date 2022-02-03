@@ -36,10 +36,11 @@ func main() {
 	defer cancel()
 
 	// register controllers
-	productRepository := repositories.NewProductManager("concurrent-go-product", db)
+	productRepository := repositories.NewProductManager("product", db)
 	productService := services.NewProductService(productRepository)
-	productParty := app.Party("/products")
+	productParty := app.Party("/product")
 	product := mvc.New(productParty)
+	// register productService as a dependency of the controller
 	product.Register(ctx, productService)
 	product.Handle(new(controllers.ProductController))
 

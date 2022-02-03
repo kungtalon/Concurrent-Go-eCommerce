@@ -2,7 +2,10 @@ module products
 
 go 1.17
 
-require github.com/kataras/iris/v12 v12.1.8
+require (
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/kataras/iris/v12 v12.1.8
+)
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect

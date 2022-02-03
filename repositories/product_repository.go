@@ -58,6 +58,7 @@ func (p *ProductManager) Insert(product *datamodels.Product) (productID int64, e
 	}
 
 	// pass in arguments in sql
+	// ID is not passed in, it is set to be auto_increment in mysql
 	result, errStmt := stmt.Exec(
 		product.ProductName,
 		product.ProductNum,
@@ -141,6 +142,7 @@ func (p *ProductManager) SelectByKey(productID int64) (productResult *datamodels
 		return &datamodels.Product{}, nil
 	}
 
+	productResult = &datamodels.Product{}
 	common.DataToStructByTagSql(result, productResult)
 	return
 }

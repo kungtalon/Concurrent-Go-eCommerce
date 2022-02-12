@@ -3,11 +3,18 @@ package common
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 // create a mysql connection
 func NewMysqlConn() (db *sql.DB, err error) {
 	db, err = sql.Open("mysql", "root:Yinmu.123@tcp(localhost:3306)/lightning?charset=utf8")
+	return
+}
+
+func NewMysqlConnGorm() (db *gorm.DB, err error) {
+	db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	return
 }
 
@@ -39,30 +46,30 @@ func GetResultRow(rows *sql.Rows) map[string]string {
 
 // get all
 func GetResultRows(rows *sql.Rows) map[int]map[string]string {
-	// return all columns
+	// return all columns in the format of a map
 	columns, _ := rows.Columns()
 	// use []byte to represent a row
 	vals := make([][]byte, len(columns))
 	// a row of filling data
 	scans := make([]interface{}, len(columns))
-	//这里scans引用vals，把数据填充到[]byte里
+	// temporarily we scan row values into []byte
 	for k, _ := range vals {
 		scans[k] = &vals[k]
 	}
 	i := 0
 	result := make(map[int]map[string]string)
 	for rows.Next() {
-		//填充数据
+		// read row data
 		rows.Scan(scans...)
-		//每行数据
+		// create a map for this row
 		row := make(map[string]string)
-		//把vals中的数据复制到row中
+		// copy data in vals to row
 		for k, v := range vals {
 			key := columns[k]
-			//这里把[]byte数据转成string
+			// convert []byte to string
 			row[key] = string(v)
 		}
-		//放入结果集
+		// put into the map that will be returned
 		result[i] = row
 		i++
 	}

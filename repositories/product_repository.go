@@ -37,7 +37,7 @@ func (p *ProductManager) Conn() (err error) {
 		p.mysqlConn = mysql
 	}
 	if p.table == "" {
-		p.table = "product"
+		p.table = common.PRODUCT_TABLE_NAME
 	}
 	return
 }

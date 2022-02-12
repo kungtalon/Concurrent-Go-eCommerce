@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
+	"github.com/kataras/iris/v12"
 	"products/backend/web/controllers"
 	"products/common"
 	"products/repositories"
 	"products/services"
 
-	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 )
 
@@ -36,7 +36,7 @@ func main() {
 	defer cancel()
 
 	// register controllers
-	productRepository := repositories.NewProductManager("product", db)
+	productRepository := repositories.NewProductManager(common.PRODUCT_TABLE_NAME, db)
 	productService := services.NewProductService(productRepository)
 	productParty := app.Party("/product")
 	product := mvc.New(productParty)
@@ -44,10 +44,22 @@ func main() {
 	product.Register(ctx, productService)
 	product.Handle(new(controllers.ProductController))
 
+	orderRepository := repositories.NewOrderManagerRepository(common.ORDER_TABLE_NAME, db)
+	orderService := services.NewOrderService(orderRepository)
+	orderParty := app.Party("/order")
+	order := mvc.New(orderParty)
+	order.Register(ctx, orderService)
+	order.Handle(new(controllers.OrderController))
+
 	// app start
 	app.Run(
 		iris.Addr("localhost:8080"),
 		iris.WithoutServerError(iris.ErrServerClosed),
 		iris.WithOptimizations,
 	)
+}
+
+// RegisterNewController reduces the code for registering controllers
+func RegisterNewController(ctx context.Context, relativePath string, controller interface{}) {
+
 }

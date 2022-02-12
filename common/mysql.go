@@ -3,7 +3,7 @@ package common
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"gorm.io/driver/sqlite"
+	gomysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -14,7 +14,9 @@ func NewMysqlConn() (db *sql.DB, err error) {
 }
 
 func NewMysqlConnGorm() (db *gorm.DB, err error) {
-	db, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	//mysqlDB, err := NewMysqlConn()
+	dsn := "root:Yinmu.123@tcp(localhost:3306)/gorm?charset=utf8mb4&parseTime=True&loc=Local"
+	db, err = gorm.Open(gomysql.Open(dsn), &gorm.Config{})
 	return
 }
 

@@ -67,11 +67,11 @@ func (p *ProductController) PostAdd() {
 
 func (p *ProductController) GetManager() mvc.View {
 	idString := p.Ctx.URLParam("id")
-	id, err := strconv.ParseInt(idString, 10, 16)
+	id, err := strconv.ParseUint(idString, 10, 32)
 	if err != nil {
 		p.Ctx.Application().Logger().Debug(err)
 	}
-	product, err := p.ProductService.GetProductByID(id)
+	product, err := p.ProductService.GetProductByID(uint(id))
 	if err != nil {
 		p.Ctx.Application().Logger().Debug(err)
 	}
@@ -86,11 +86,11 @@ func (p *ProductController) GetManager() mvc.View {
 
 func (p *ProductController) GetDelete() {
 	idString := p.Ctx.URLParam("id")
-	id, err := strconv.ParseInt(idString, 10, 16)
+	id, err := strconv.ParseUint(idString, 10, 32)
 	if err != nil {
 		p.Ctx.Application().Logger().Debug(err)
 	}
-	success := p.ProductService.DeleteProductByID(id)
+	success := p.ProductService.DeleteProductByID(uint(id))
 	if success {
 		p.Ctx.Application().Logger().Debug("Product Deleted: ID: " + idString)
 	} else {

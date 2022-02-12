@@ -1,10 +1,9 @@
 package repositories
 
 import (
-	"database/sql"
+	"gorm.io/gorm"
 	"products/common"
 	"products/datamodels"
-	"strconv"
 )
 
 // develop the interface
@@ -12,79 +11,55 @@ import (
 
 type IProduct interface {
 	Conn() error
-	Insert(*datamodels.Product) (int64, error)
-	Delete(int64) bool
+	Insert(*datamodels.Product) (uint, error)
+	Delete(uint) bool
 	Update(*datamodels.Product) error
-	SelectByKey(int64) (*datamodels.Product, error)
+	SelectByKey(uint) (*datamodels.Product, error)
 	SelectAll() ([]*datamodels.Product, error)
 }
 
 type ProductManager struct {
-	table     string
-	mysqlConn *sql.DB
+	mysqlConn *gorm.DB
 }
 
-func NewProductManager(table string, db *sql.DB) IProduct {
-	return &ProductManager{table: table, mysqlConn: db}
+func NewProductManager(db *gorm.DB) IProduct {
+	return &ProductManager{mysqlConn: db}
 }
 
 func (p *ProductManager) Conn() (err error) {
 	if p.mysqlConn == nil {
-		mysql, err := common.NewMysqlConn()
+		mysql, err := common.NewMysqlConnGorm()
 		if err != nil {
 			return err
 		}
 		p.mysqlConn = mysql
-	}
-	if p.table == "" {
-		p.table = common.PRODUCT_TABLE_NAME
+		err = p.mysqlConn.AutoMigrate(&datamodels.Product{})
+		if err != nil {
+			return err
+		}
 	}
 	return
 }
 
-func (p *ProductManager) Insert(product *datamodels.Product) (productID int64, err error) {
+func (p *ProductManager) Insert(product *datamodels.Product) (productID uint, err error) {
 	// check connection
 	if err = p.Conn(); err != nil {
 		return
 	}
 
-	// prepare formatted sql statement
-	sql := `
-		INSERT ` + p.table + ` 
-		SET productName=?,productNum=?,productImage=?,productUrl=?`
-	stmt, errSql := p.mysqlConn.Prepare(sql)
-	if errSql != nil {
-		return 0, errSql
-	}
+	result := p.mysqlConn.Create(&product)
 
-	// pass in arguments in sql
-	// ID is not passed in, it is set to be auto_increment in mysql
-	result, errStmt := stmt.Exec(
-		product.ProductName,
-		product.ProductNum,
-		product.ProductImage,
-		product.ProductUrl,
-	)
-	if errStmt != nil {
-		return 0, errStmt
-	}
-	return result.LastInsertId()
+	return product.ID, result.Error
 }
 
-func (p *ProductManager) Delete(productID int64) bool {
+func (p *ProductManager) Delete(productID uint) bool {
 	// check connection
 	if err := p.Conn(); err != nil {
 		return false
 	}
 
-	sql := "delete from " + p.table + " where ID=?"
-	stmt, err := p.mysqlConn.Prepare(sql)
-	if err != nil {
-		return false
-	}
-
-	_, err = stmt.Exec(productID)
-	if err != nil {
+	result := p.mysqlConn.Delete(&datamodels.Product{}, productID)
+	if result.Error != nil {
 		return false
 	}
 	return true
@@ -95,55 +70,21 @@ func (p *ProductManager) Update(product *datamodels.Product) (err error) {
 		return err
 	}
 
-	sql := `
-		UPDATE ` + p.table + ` 
-		SET productNum=?,productName=?,productImage=?,productUrl=? 
-		WHERE ID=` + strconv.FormatInt(product.ID, 10)
-	stmt, err := p.mysqlConn.Prepare(sql)
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.Exec(
-		product.ProductNum,
-		product.ProductName,
-		product.ProductImage,
-		product.ProductUrl,
-	)
-	if err != nil {
-		return err
-	}
-
-	return
+	result := p.mysqlConn.Model(&datamodels.Product{}).Where("ID=?", product.ID).Updates(product)
+	return result.Error
 }
 
 // select a product by its ID
-func (p *ProductManager) SelectByKey(productID int64) (productResult *datamodels.Product, err error) {
+func (p *ProductManager) SelectByKey(productID uint) (productResult *datamodels.Product, err error) {
 	// check connection
 	if err = p.Conn(); err != nil {
 		return &datamodels.Product{}, err
 	}
 
-	// prepare formatted sql statement
-	sql := `
-		SELECT * 
-		FROM  ` + p.table + `
-		WHERE ID=` + strconv.FormatInt(productID, 10)
-
-	row, errRow := p.mysqlConn.Query(sql)
-	// be careful when we are going to copy data from sql rows
-	if errRow != nil {
-		return &datamodels.Product{}, errRow
-	}
-	defer row.Close()
-
-	result := common.GetResultRow(row)
-	if len(result) == 0 {
-		return &datamodels.Product{}, nil
-	}
-
 	productResult = &datamodels.Product{}
-	common.DataToStructByTagSql(result, productResult)
+	result := p.mysqlConn.First(&productResult, productID)
+	err = result.Error
+
 	return
 }
 
@@ -152,23 +93,8 @@ func (p *ProductManager) SelectAll() (productArray []*datamodels.Product, err er
 		return nil, err
 	}
 
-	sql := `SELECT * FROM ` + p.table
-	rows, err := p.mysqlConn.Query(sql)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	results := common.GetResultRows(rows)
-	if len(results) == 0 {
-		return nil, nil
-	}
-
-	for _, v := range results {
-		product := &datamodels.Product{}
-		common.DataToStructByTagSql(v, product)
-		productArray = append(productArray, product)
-	}
+	results := p.mysqlConn.Find(&productArray)
+	err = results.Error
 
 	return
 }

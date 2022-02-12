@@ -5,6 +5,7 @@ import (
 	"github.com/kataras/iris/v12"
 	"products/backend/web/controllers"
 	"products/common"
+	"products/datamodels"
 	"products/repositories"
 	"products/services"
 
@@ -28,7 +29,11 @@ func main() {
 		ctx.View("shared/error.html")
 	})
 
-	db, err := common.NewMysqlConn()
+	gormdb, err := common.NewMysqlConnGorm()
+	if err != nil {
+		log.Error(err)
+	}
+	err = gormdb.AutoMigrate(&datamodels.Product{}, &datamodels.Order{})
 	if err != nil {
 		log.Error(err)
 	}
@@ -36,7 +41,7 @@ func main() {
 	defer cancel()
 
 	// register controllers
-	productRepository := repositories.NewProductManager(common.PRODUCT_TABLE_NAME, db)
+	productRepository := repositories.NewProductManager(gormdb)
 	productService := services.NewProductService(productRepository)
 	productParty := app.Party("/product")
 	product := mvc.New(productParty)
@@ -44,7 +49,7 @@ func main() {
 	product.Register(ctx, productService)
 	product.Handle(new(controllers.ProductController))
 
-	orderRepository := repositories.NewOrderManagerRepository(common.ORDER_TABLE_NAME, db)
+	orderRepository := repositories.NewOrderManagerRepository(gormdb)
 	orderService := services.NewOrderService(orderRepository)
 	orderParty := app.Party("/order")
 	order := mvc.New(orderParty)

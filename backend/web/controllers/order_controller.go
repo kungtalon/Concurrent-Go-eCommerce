@@ -28,11 +28,11 @@ func (o *OrderController) Get() mvc.View {
 
 func (o *OrderController) GetDelete() {
 	idString := o.Ctx.URLParam("id")
-	orderId, err := strconv.ParseInt(idString, 10, 16)
+	orderId, err := strconv.ParseUint(idString, 10, 32)
 	if err != nil {
 		o.Ctx.Application().Logger().Debug(err)
 	}
-	success := o.OrderService.DeleteOrderByID(orderId)
+	success := o.OrderService.DeleteOrderByID(uint(orderId))
 	if success {
 		o.Ctx.Application().Logger().Debug("Order Deleted: ID: " + idString)
 	} else {

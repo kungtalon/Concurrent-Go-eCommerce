@@ -6,10 +6,10 @@ import (
 )
 
 type IProductService interface {
-	GetProductByID(int64) (*datamodels.Product, error)
+	GetProductByID(uint) (*datamodels.Product, error)
 	GetAllProducts() ([]*datamodels.Product, error)
-	DeleteProductByID(int64) bool
-	InsertProduct(*datamodels.Product) (int64, error)
+	DeleteProductByID(uint) bool
+	InsertProduct(*datamodels.Product) (uint, error)
 	UpdateProduct(*datamodels.Product) error
 }
 
@@ -21,7 +21,7 @@ func NewProductService(repository repositories.IProduct) IProductService {
 	return &ProductService{productRepository: repository}
 }
 
-func (p *ProductService) GetProductByID(productID int64) (*datamodels.Product, error) {
+func (p *ProductService) GetProductByID(productID uint) (*datamodels.Product, error) {
 	return p.productRepository.SelectByKey(productID)
 }
 
@@ -29,11 +29,11 @@ func (p *ProductService) GetAllProducts() ([]*datamodels.Product, error) {
 	return p.productRepository.SelectAll()
 }
 
-func (p *ProductService) DeleteProductByID(productID int64) bool {
+func (p *ProductService) DeleteProductByID(productID uint) bool {
 	return p.productRepository.Delete(productID)
 }
 
-func (p *ProductService) InsertProduct(product *datamodels.Product) (int64, error) {
+func (p *ProductService) InsertProduct(product *datamodels.Product) (uint, error) {
 	return p.productRepository.Insert(product)
 }
 

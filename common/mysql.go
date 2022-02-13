@@ -27,7 +27,7 @@ func ReadDBConn(path string) (authen []string, err error) {
 
 // create a mysql connection
 func NewMysqlConn() (db *sql.DB, err error) {
-	authentication, err := ReadDBConn("./DBCON")
+	authentication, err := ReadDBConn("common/DBCON")
 	if err != nil {
 		return
 	}
@@ -37,7 +37,7 @@ func NewMysqlConn() (db *sql.DB, err error) {
 
 func NewMysqlConnGorm() (db *gorm.DB, err error) {
 	//mysqlDB, err := NewMysqlConn()
-	authentication, err := ReadDBConn("./DBCON")
+	authentication, err := ReadDBConn("common/DBCON")
 	if err != nil {
 		return
 	}

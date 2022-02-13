@@ -35,6 +35,18 @@
                                 <input type="text"   class="form-control" name="ProductUrl" value="{{.product.ProductUrl}}">
                             </div>
                         </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Product Price</label>
+                            <div class="col-sm-6">
+                                <input type="text"   class="form-control" name="ProductPrice" value="{{ .product.FormatProductPrice }}">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Deal Price</label>
+                            <div class="col-sm-6">
+                                <input type="text"   class="form-control" name="DealPrice" value="{{ .product.FormatDealPrice }}">
+                            </div>
+                        </div>
                         <div class="row xs-pt-15">
                             <div class="col-xs-6">
                                 <p class="text-right">

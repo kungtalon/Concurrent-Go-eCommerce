@@ -6,5 +6,11 @@ type Order struct {
 	gorm.Model
 	UserId      uint `sql:"UserId"`
 	ProductId   uint `sql:"ProductId"`
-	OrderStatus uint `sql:"OrderStatus"`
+	OrderStatus int  `sql:"OrderStatus"`
 }
+
+const (
+	OrderWait = iota
+	OrderSuccess
+	OrderFailed
+)

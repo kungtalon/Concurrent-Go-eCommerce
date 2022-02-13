@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"github.com/kataras/iris/v12"
-	"products/backend/web/controllers"
-	"products/common"
-	"products/datamodels"
-	"products/repositories"
-	"products/services"
+	"jzmall/backend/web/controllers"
+	"jzmall/common"
+	"jzmall/datamodels"
+	"jzmall/repositories"
+	"jzmall/services"
 
 	"github.com/kataras/iris/v12/mvc"
 )

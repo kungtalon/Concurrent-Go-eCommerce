@@ -1,8 +1,8 @@
 package services
 
 import (
-	"products/datamodels"
-	"products/repositories"
+	"jzmall/datamodels"
+	"jzmall/repositories"
 )
 
 type IOrderService interface {

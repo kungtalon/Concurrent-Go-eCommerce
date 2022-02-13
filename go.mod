@@ -1,4 +1,4 @@
-module products
+module jzmall
 
 go 1.17
 
@@ -6,6 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/kataras/golog v0.0.10
 	github.com/kataras/iris/v12 v12.1.8
+	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	gorm.io/driver/mysql v1.2.3
 	gorm.io/gorm v1.22.5
 )
@@ -57,7 +58,6 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
 	golang.org/x/net v0.0.0-20220111093109-d55c255bac03 // indirect
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
 	golang.org/x/text v0.3.7 // indirect

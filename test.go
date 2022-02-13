@@ -1,8 +1,8 @@
 package main
 
 import (
-	"products/common"
-	"products/datamodels"
+	"jzmall/common"
+	"jzmall/datamodels"
 )
 
 func main() {

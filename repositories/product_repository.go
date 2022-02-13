@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"gorm.io/gorm"
-	"products/common"
-	"products/datamodels"
+	"jzmall/common"
+	"jzmall/datamodels"
 )
 
 // develop the interface

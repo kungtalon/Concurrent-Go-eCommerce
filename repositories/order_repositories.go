@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"gorm.io/gorm"
-	"products/common"
-	"products/datamodels"
+	"jzmall/common"
+	"jzmall/datamodels"
 )
 
 type IOrderRepository interface {
@@ -93,11 +93,6 @@ func (o *OrderManagerRepository) SelectAllWithInfo() (infoMap map[int]map[string
 	if err = o.Conn(); err != nil {
 		return nil, err
 	}
-
-	//sql := `SELECT o.ID, p.ProductName, o.OrderStatus
-	//		FROM ` + o.table + ` o
-	//		LEFT JOIN ` + common.PRODUCT_TABLE_NAME + ` p
-	//		ON o.ProductId = p.ID`
 
 	rows, errRows := o.mysqlConn.Table("orders").Select("orders.ID, products.product_name, orders.order_status").Joins("left join products on orders.product_id = products.ID").Rows()
 	if errRows != nil {

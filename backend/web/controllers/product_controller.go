@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"products/common"
-	"products/datamodels"
-	"products/services"
+	"jzmall/common"
+	"jzmall/datamodels"
+	"jzmall/services"
 	"strconv"
 
 	"github.com/kataras/iris/v12"

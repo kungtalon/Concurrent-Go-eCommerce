@@ -6,7 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/kataras/golog v0.0.10
 	github.com/kataras/iris/v12 v12.1.8
-	gorm.io/driver/sqlite v1.2.6
+	gorm.io/driver/mysql v1.2.3
 	gorm.io/gorm v1.22.5
 )
 
@@ -37,7 +37,6 @@ require (
 	github.com/kataras/pio v0.0.2 // indirect
 	github.com/kataras/sitemap v0.0.5 // indirect
 	github.com/klauspost/compress v1.14.1 // indirect
-	github.com/mattn/go-sqlite3 v1.14.9 // indirect
 	github.com/mediocregopher/radix/v3 v3.4.2 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
@@ -52,6 +51,7 @@ require (
 	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/smartystreets/goconvey v1.7.2 // indirect
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/valyala/fasthttp v1.33.0 // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect

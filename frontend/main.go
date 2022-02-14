@@ -27,6 +27,7 @@ func main() {
 	app.RegisterView(templates)
 	// set up template targets
 	app.HandleDir("/public", "./frontend/web/public")
+	app.HandleDir("/html", "./frontend/web/htmlProductShow")
 	app.OnAnyErrorCode(func(ctx iris.Context) {
 		ctx.ViewData("message", ctx.Values().GetStringDefault("message", "An error Occurred..."))
 		ctx.ViewLayout("")

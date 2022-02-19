@@ -94,7 +94,9 @@ func (o *OrderManagerRepository) SelectAllWithInfo() (infoMap map[int]map[string
 		return nil, err
 	}
 
-	rows, errRows := o.mysqlConn.Table("orders").Select("orders.ID, products.product_name, orders.order_status").Joins("left join products on orders.product_id = products.ID").Rows()
+	rows, errRows := o.mysqlConn.Table("orders").Select(
+		"orders.ID, orders.user_id, products.product_name, orders.order_status").Joins(
+		"left join products on orders.product_id = products.ID").Rows()
 	if errRows != nil {
 		return nil, errRows
 	}

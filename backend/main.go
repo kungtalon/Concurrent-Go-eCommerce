@@ -22,7 +22,8 @@ func main() {
 	templates := iris.HTML("./backend/web/views", ".html").Layout("shared/layout.html").Reload(true)
 	app.RegisterView(templates)
 	// set up template targets
-	app.HandleDir("/assets", "./backend/web/assets")
+	app.HandleDir("/assets", common.CDN_DOMAIN_URL+"/assets")
+	//app.HandleDir("/assets", "./backend/web/assets")
 	app.OnAnyErrorCode(func(ctx iris.Context) {
 		ctx.ViewData("message", ctx.Values().GetStringDefault("message", "Error Occurred..."))
 		ctx.ViewLayout("")

@@ -24,10 +24,9 @@
                             {{range $i, $v := .order}}
                             <tr>
                                 <td class="user-avatar cell-detail user-info">{{$v.ID}}</td>
-                                <td class="cell-detail"></td>
-                                <td class="milestone"> {{$v.productName}}
-                                </td>
-                                <td class="cell-detail">{{ if eq $v.orderStatus "1"}} HasShipped {{else}} NotShipped {{end}}</td>
+                                <td class="cell-detail">{{ $v.user_id }}</td>
+                                <td class="cell-detail"> {{ $v.product_name }}</td>
+                                <td class="cell-detail">{{ if eq $v.order_status "1"}} HasShipped {{else}} NotShipped {{end}}</td>
                             </tr>
                             {{end}}
                             </tbody>

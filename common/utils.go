@@ -1,11 +1,33 @@
 package common
 
 import (
+	"bufio"
 	"errors"
+	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
+
+// ReadPrivateFile reads local private files and parses the contents
+func ReadPrivateFile(path string) (results []string, err error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		contents := strings.Split(scanner.Text(), " ")
+		results = append(results, contents...)
+	}
+	if len(results) == 0 {
+		return results, errors.New("Got Empty File: " + path)
+	}
+	return
+}
 
 // map sql query results to struct according to the struct tag
 func DataToStructByTagSql(data map[string]string, obj interface{}) {

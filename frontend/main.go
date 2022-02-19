@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/sessions"
+	"github.com/kataras/iris/v12/mvc"
 	"gorm.io/gorm"
 	"jzmall/common"
 	"jzmall/datamodels"
@@ -11,9 +11,6 @@ import (
 	"jzmall/frontend/web/controllers"
 	"jzmall/repositories"
 	"jzmall/services"
-	"time"
-
-	"github.com/kataras/iris/v12/mvc"
 )
 
 func main() {
@@ -26,8 +23,9 @@ func main() {
 	templates := iris.HTML("./frontend/web/views", ".html").Layout("shared/layout.html").Reload(true)
 	app.RegisterView(templates)
 	// set up template targets
-	app.HandleDir("/public", "./frontend/web/public")
-	app.HandleDir("/html", "./frontend/web/htmlProductShow")
+	//app.HandleDir("/public", "./frontend/web/public")
+	app.HandleDir("/public", common.CDN_DOMAIN_URL+"/public")
+	//app.HandleDir("/html", "./frontend/web/htmlProductShow")
 	app.OnAnyErrorCode(func(ctx iris.Context) {
 		ctx.ViewData("message", ctx.Values().GetStringDefault("message", "An error Occurred..."))
 		ctx.ViewLayout("")
@@ -45,12 +43,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	sess := sessions.New(sessions.Config{
-		Cookie:  "helloworld",
-		Expires: 60 * time.Minute,
-	})
-
-	RegisterControllers(app, gormdb, ctx, sess)
+	RegisterControllers(app, gormdb, ctx)
 
 	// app start
 	app.Run(
@@ -61,12 +54,12 @@ func main() {
 }
 
 // register controllers
-func RegisterControllers(app *iris.Application, db *gorm.DB, ctx context.Context, session *sessions.Sessions) {
+func RegisterControllers(app *iris.Application, db *gorm.DB, ctx context.Context) {
 	// user controller
 	userRepository := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepository)
 	userPro := mvc.New(app.Party("/user"))
-	userPro.Register(userService, ctx, session.Start)
+	userPro.Register(userService, ctx)
 	userPro.Handle(new(controllers.UserController))
 
 	orderRepository := repositories.NewOrderManagerRepository(db)
@@ -78,7 +71,7 @@ func RegisterControllers(app *iris.Application, db *gorm.DB, ctx context.Context
 	productApp := app.Party("/product")
 	productApp.Use(middleware.AuthConProduct)
 	productPro := mvc.New(productApp)
-	productPro.Register(productService, orderService, ctx, session.Start)
+	productPro.Register(productService, orderService, ctx)
 	productPro.Handle(new(controllers.ProductController))
 
 }

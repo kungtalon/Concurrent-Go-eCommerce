@@ -7,7 +7,7 @@ type FilterHandle func(rw http.ResponseWriter, req *http.Request) error
 type WebHandle func(rw http.ResponseWriter, req *http.Request)
 
 type Filter struct {
-	// store the URIs that should be blocked
+	// store the URIs that should be intercepted
 	filterMap map[string]FilterHandle
 }
 
@@ -27,7 +27,7 @@ func (f *Filter) Handle(handle WebHandle) func(rw http.ResponseWriter, r *http.R
 	return func(rw http.ResponseWriter, r *http.Request) {
 		for path, handle := range f.filterMap {
 			if path == r.RequestURI {
-				// block the uri
+				// intercepted the uri and activate the handle
 				err := handle(rw, r)
 				if err != nil {
 					rw.Write([]byte(err.Error()))

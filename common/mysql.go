@@ -1,33 +1,15 @@
 package common
 
 import (
-	"bufio"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	gomysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"os"
-	"strings"
 )
-
-func ReadDBConn(path string) (authen []string, err error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		contents := strings.Split(scanner.Text(), " ")
-		authen = append(authen, contents...)
-	}
-	return
-}
 
 // create a mysql connection
 func NewMysqlConn() (db *sql.DB, err error) {
-	authentication, err := ReadDBConn("common/DBCON")
+	authentication, err := ReadPrivateFile("common/DBCON")
 	if err != nil {
 		return
 	}
@@ -37,7 +19,7 @@ func NewMysqlConn() (db *sql.DB, err error) {
 
 func NewMysqlConnGorm() (db *gorm.DB, err error) {
 	//mysqlDB, err := NewMysqlConn()
-	authentication, err := ReadDBConn("common/DBCON")
+	authentication, err := ReadPrivateFile("common/DBCON")
 	if err != nil {
 		return
 	}

@@ -58,6 +58,7 @@ func (c *UserController) PostLogin() mvc.Response {
 		passWord = c.Ctx.FormValue("password")
 	)
 
+	// validate userid and password
 	user, success := c.Service.IsPwdSuccess(userName, passWord)
 	if !success {
 		c.Ctx.Application().Logger().Debug("Wrong Password for User " + userName)
@@ -66,8 +67,14 @@ func (c *UserController) PostLogin() mvc.Response {
 		}
 	}
 
+	// write user id to cookie
 	common.GlobalCookie(c.Ctx, "uid", strconv.FormatUint(uint64(user.ID), 10))
-	c.Session.Set("userID", strconv.FormatUint(uint64(user.ID), 10))
+	uidByte := []byte(strconv.FormatUint(uint64(user.ID), 10))
+	uidStr, err := common.EnPwdCode(uidByte)
+	if err != nil {
+		c.Ctx.Application().Logger().Debug(err)
+	}
+	common.GlobalCookie(c.Ctx, "sign", uidStr)
 	return mvc.Response{
 		Path: "/product",
 	}

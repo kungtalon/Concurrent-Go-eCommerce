@@ -58,7 +58,7 @@ func (c *Consistent) hashKey(key string) uint32 {
 	return crc32.ChecksumIEEE([]byte(key))
 }
 
-// updateSortedHashes resort the sortedHases slice, useful for binary lookup
+// updateSortedHashes resort the sortedHases slice, useful for binary Lookup
 func (c *Consistent) updateSortedHashes() {
 	// init with an empty slice
 	hashes := c.sortedHashes[:0]

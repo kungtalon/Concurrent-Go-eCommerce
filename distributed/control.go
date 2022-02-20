@@ -2,19 +2,43 @@ package distributed
 
 import (
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"sync"
+	"time"
 )
+
+// users are not allowed to buy again within 20 seconds
+const interval = 20
 
 type AccessControl struct {
 	// used for any custom data
-	SourcesArray map[int]interface{}
+	SourcesArray map[int]time.Time
 	// map is not multi-thread safe, so locks are needed
 	localHost string
 	port      string
 	hashCon   *Consistent
-	*sync.RWMutex
+	BlackList *BlackList
+	sync.RWMutex
+}
+
+type BlackList struct {
+	Lookup map[int]bool
+	sync.RWMutex
+}
+
+func (bl *BlackList) GetBlackListByID(uid int) bool {
+	bl.RLock()
+	defer bl.RUnlock()
+	return bl.Lookup[uid]
+}
+
+func (bl *BlackList) SetBlackListByID(uid int) bool {
+	bl.Lock()
+	defer bl.Unlock()
+	bl.Lookup[uid] = true
+	return true
 }
 
 func (m *AccessControl) SetHosts(localHost string, port string) {
@@ -26,21 +50,23 @@ func (m *AccessControl) SetConsistentHash(consistent *Consistent) {
 	m.hashCon = consistent
 }
 
-func (m *AccessControl) GetNewRecord(uid int) interface{} {
+func (m *AccessControl) GetNewRecord(uid int) time.Time {
 	m.RWMutex.RLock()
 	defer m.RWMutex.RUnlock()
 	data := m.SourcesArray[uid]
+	log.Println("Latest access for user " + strconv.Itoa(uid) + " at time " + data.Format("2020-01-01 15:02:30"))
 	return data
 }
 
 func (m *AccessControl) SetNewRecord(uid int) {
 	m.RWMutex.Lock()
-	m.SourcesArray[uid] = "hello jzlmall"
+	m.SourcesArray[uid] = time.Now()
 	m.RWMutex.Unlock()
 }
 
 func (m *AccessControl) GetDistributedRight(req *http.Request) bool {
 	uid, err := req.Cookie("uid")
+	log.Println("Cur uid: " + uid.Value)
 	if err != nil {
 		return false
 	}
@@ -99,16 +125,25 @@ func (m *AccessControl) GetDataFromMap(uid string) bool {
 	if err != nil {
 		return false
 	}
-	data := m.GetNewRecord(uidInt)
 
-	if data != nil {
-		return true
+	if m.BlackList.GetBlackListByID(uidInt) {
+		return false
 	}
-	return false
+
+	dataRecord := m.GetNewRecord(uidInt)
+	if !dataRecord.IsZero() {
+		if dataRecord.Add(time.Duration(interval) * time.Second).After(time.Now()) {
+			log.Println("User " + uid + " operated too frequently.")
+			return false
+		}
+	}
+	m.SetNewRecord(uidInt)
+	return true
 }
 
 func (m *AccessControl) GetDataFromOtherMap(host string, request *http.Request) bool {
 	hostUrl := "http://" + host + ":" + m.port + "/check"
+	log.Println("Sending check request to " + host)
 	response, body, err := m.GetUrl(hostUrl, request)
 	if err != nil {
 		return false

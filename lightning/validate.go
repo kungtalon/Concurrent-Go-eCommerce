@@ -11,9 +11,10 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
-var hostArray = []string{"127.0.0.1", "127.0.0.1"}
+var hostArray = []string{"127.0.0.1", "172.23.240.1"}
 
 var localHost = ""
 
@@ -26,9 +27,11 @@ var port = "8083"
 
 var hashConsistent *distributed.Consistent
 
-var accessControl = &distributed.AccessControl{SourcesArray: make(map[int]interface{})}
-
 var rabbitmqValidate *distributed.RabbitMQ
+
+var blackList = &distributed.BlackList{Lookup: make(map[int]bool)}
+
+var accessControl = &distributed.AccessControl{SourcesArray: make(map[int]time.Time), BlackList: blackList}
 
 func CheckUserRight(rw http.ResponseWriter, r *http.Request) {
 	right := accessControl.GetDistributedRight(r)
@@ -47,16 +50,17 @@ func Check(rw http.ResponseWriter, r *http.Request) {
 		success = []byte("true")
 	)
 
-	fmt.Println("Doing check...")
+	log.Println("Doing check...")
 	queryForm, err := url.ParseQuery(r.URL.RawQuery)
 	if err != nil || len(queryForm["productID"]) <= 0 || len(queryForm["productID"][0]) <= 0 {
+		log.Println("Wrong query!")
 		rw.Write(failure)
 		return
 	}
 	productIdStr := queryForm["productID"][0]
-	log.Println(productIdStr)
 	userCookie, err := r.Cookie("uid")
 	if err != nil {
+		log.Println("Product id conversion error...")
 		rw.Write(failure)
 		return
 	}
@@ -64,17 +68,21 @@ func Check(rw http.ResponseWriter, r *http.Request) {
 	// 1. Distributed Authentication
 	right := accessControl.GetDistributedRight(r)
 	if right == false {
+		log.Println("User check failed...")
 		rw.Write(failure)
+		return
 	}
 	// 2. Get the control of product number, avoid oversale
 	hostUrl := "http://" + GetOneIp + ":" + GetOnePort + "/getOne"
 	responseValidate, validateBody, err := accessControl.GetUrl(hostUrl, r)
 	if err != nil {
+		log.Println("Failed to get response from access control")
 		rw.Write(failure)
 		return
 	}
 	// check the count control service statuscode
 	if responseValidate.StatusCode != 200 || string(validateBody) != "true" {
+		log.Println("Response is not expected...")
 		rw.Write(failure)
 		return
 	}
@@ -138,8 +146,6 @@ func ValidateCookie(r *http.Request) error {
 
 func main() {
 	hashConsistent = distributed.NewConsistent()
-	accessControl.SetHosts(localHost, port)
-	accessControl.SetConsistentHash(hashConsistent)
 	// add node with consistent hash algo
 	for _, v := range hostArray {
 		// add hostIP to hash ring
@@ -153,8 +159,14 @@ func main() {
 	localHost = localIp
 	log.Println("LocalHost = " + localHost)
 
+	accessControl.SetHosts(localHost, port)
+	accessControl.SetConsistentHash(hashConsistent)
+
 	rabbitmqValidate = distributed.NewRabbitMQSimple(common.AMQP_QUEUE_NAME)
 	defer rabbitmqValidate.Destroy()
+
+	http.Handle("/html/", http.StripPrefix("/html", http.FileServer(http.Dir("./frontend/web/htmlProductShow"))))
+	http.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.Dir(common.CDN_DOMAIN_URL))))
 
 	filter := common.NewFiler()
 	filter.RegisterFilterUri("/check", Auth)

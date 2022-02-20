@@ -39,6 +39,7 @@ func (oc *OrderConsumer) DoConsume(dl *amqp.Delivery) {
 	// ack true means all incoming messages have been consumed
 	// must be false!
 	dl.Ack(false)
+	log.Println("One message consumed successfully: " + string(dl.Body))
 }
 
 func main() {

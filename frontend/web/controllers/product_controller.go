@@ -52,6 +52,7 @@ func ExistsStaticHtml(filePath string) bool {
 	return err == nil || os.IsExist(err)
 }
 
+// GetGenerateHtml generates the static html for a product
 func (p *ProductController) GetGenerateHtml() {
 	productIdStr := p.Ctx.URLParam("productID")
 	if productIdStr == "" {

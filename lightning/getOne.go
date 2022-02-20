@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -27,15 +28,17 @@ func GetOneProduct() bool {
 
 func GetProduct(rw http.ResponseWriter, req *http.Request) {
 	if GetOneProduct() {
+		fmt.Println("Get One Successful!")
 		rw.Write([]byte("true"))
 		return
 	}
+	fmt.Println("Get One failed!")
 	rw.Write([]byte("false"))
 }
 
 func main() {
 	http.HandleFunc("/getOne", GetProduct)
-	err := http.ListenAndServe(":12345", nil)
+	err := http.ListenAndServe(":8084", nil)
 	if err != nil {
 		log.Fatal("Err: ", err)
 	}

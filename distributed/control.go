@@ -60,21 +60,22 @@ func (m *AccessControl) GetDistributedRight(req *http.Request) bool {
 
 }
 
-func (m *AccessControl) GetDataFromOtherMap(host string, request *http.Request) bool {
+func (m *AccessControl) GetUrl(hostUrl string, request *http.Request) (response *http.Response, body []byte, err error) {
 	uidPre, err := request.Cookie("uid")
 	if err != nil {
-		return false
+		return
 	}
 	uidSign, err := request.Cookie("sign")
 	if err != nil {
-		return false
+		return
 	}
 
 	// mock http API request
+	// TODO: use gRPC instead of HTTP for communication
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "http://"+host+":"+m.port+"/access", nil)
+	req, err := http.NewRequest("GET", hostUrl, nil)
 	if err != nil {
-		return false
+		return
 	}
 
 	// put required cookies into the mocked request
@@ -84,23 +85,13 @@ func (m *AccessControl) GetDataFromOtherMap(host string, request *http.Request) 
 	req.AddCookie(coookieSign)
 
 	// retrieve from the response
-	response, err := client.Do(req)
+	response, err = client.Do(req)
+	defer response.Body.Close()
 	if err != nil {
-		return false
+		return
 	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return false
-	}
-
-	if response.StatusCode == 200 {
-		if string(body) == "true" {
-			return true
-		} else {
-			return false
-		}
-	}
-	return false
+	body, err = ioutil.ReadAll(response.Body)
+	return
 }
 
 func (m *AccessControl) GetDataFromMap(uid string) bool {
@@ -112,6 +103,21 @@ func (m *AccessControl) GetDataFromMap(uid string) bool {
 
 	if data != nil {
 		return true
+	}
+	return false
+}
+
+func (m *AccessControl) GetDataFromOtherMap(host string, request *http.Request) bool {
+	hostUrl := "http://" + host + ":" + m.port + "/check"
+	response, body, err := m.GetUrl(hostUrl, request)
+	if err != nil {
+		return false
+	}
+
+	if response.StatusCode == 200 {
+		if string(body) == "true" {
+			return true
+		}
 	}
 	return false
 }

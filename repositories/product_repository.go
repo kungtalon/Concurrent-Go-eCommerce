@@ -16,6 +16,7 @@ type IProduct interface {
 	Update(*datamodels.Product) error
 	SelectByKey(uint) (*datamodels.Product, error)
 	SelectAll() ([]*datamodels.Product, error)
+	SubProductNum(uint) error
 }
 
 type ProductManager struct {
@@ -97,4 +98,15 @@ func (p *ProductManager) SelectAll() (productArray []*datamodels.Product, err er
 	err = results.Error
 
 	return
+}
+
+func (p *ProductManager) SubProductNum(productId uint) error {
+	if err := p.Conn(); err != nil {
+		return err
+	}
+	err := p.mysqlConn.
+		Model(&datamodels.Product{}).
+		Where("ID=?", productId).
+		Update("product_num", gorm.Expr("product_num - ?", 1)).Error
+	return err
 }

@@ -3,6 +3,7 @@ package common
 import (
 	"bufio"
 	"errors"
+	"net"
 	"os"
 	"reflect"
 	"strconv"
@@ -27,6 +28,23 @@ func ReadPrivateFile(path string) (results []string, err error) {
 		return results, errors.New("Got Empty File: " + path)
 	}
 	return
+}
+
+func GetIntranceIp() (string, error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return "", err
+	}
+
+	for _, address := range addrs {
+		if ipnet, ok := address.(*net.IPNet); ok && ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				return ipnet.IP.String(), nil
+			}
+		}
+	}
+
+	return "", errors.New("Failed to get local host IP")
 }
 
 // map sql query results to struct according to the struct tag

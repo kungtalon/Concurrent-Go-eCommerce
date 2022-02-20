@@ -11,6 +11,7 @@ type IProductService interface {
 	DeleteProductByID(uint) bool
 	InsertProduct(*datamodels.Product) (uint, error)
 	UpdateProduct(*datamodels.Product) error
+	SubProductByOne(uint) error
 }
 
 type ProductService struct {
@@ -39,4 +40,8 @@ func (p *ProductService) InsertProduct(product *datamodels.Product) (uint, error
 
 func (p *ProductService) UpdateProduct(product *datamodels.Product) error {
 	return p.productRepository.Update(product)
+}
+
+func (p *ProductService) SubProductByOne(productId uint) error {
+	return p.productRepository.SubProductNum(productId)
 }

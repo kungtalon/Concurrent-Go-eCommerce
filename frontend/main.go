@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"jzmall/common"
 	"jzmall/datamodels"
+	"jzmall/distributed"
 	"jzmall/frontend/middleware"
 	"jzmall/frontend/web/controllers"
 	"jzmall/repositories"
@@ -43,7 +44,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	RegisterControllers(app, gormdb, ctx)
+	rabbitmq := distributed.NewRabbitMQSimple(common.AMQP_QUEUE_NAME)
+
+	RegisterControllers(app, gormdb, ctx, rabbitmq)
 
 	// app start
 	app.Run(
@@ -54,7 +57,7 @@ func main() {
 }
 
 // register controllers
-func RegisterControllers(app *iris.Application, db *gorm.DB, ctx context.Context) {
+func RegisterControllers(app *iris.Application, db *gorm.DB, ctx context.Context, rabbitmq *distributed.RabbitMQ) {
 	// user controller
 	userRepository := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepository)
@@ -71,7 +74,7 @@ func RegisterControllers(app *iris.Application, db *gorm.DB, ctx context.Context
 	productApp := app.Party("/product")
 	productApp.Use(middleware.AuthConProduct)
 	productPro := mvc.New(productApp)
-	productPro.Register(productService, orderService, ctx)
+	productPro.Register(productService, orderService, ctx, rabbitmq)
 	productPro.Handle(new(controllers.ProductController))
 
 }

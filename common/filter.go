@@ -1,6 +1,9 @@
 package common
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type FilterHandle func(rw http.ResponseWriter, req *http.Request) error
 
@@ -26,7 +29,7 @@ func (f *Filter) GetFilterHandler(uri string) FilterHandle {
 func (f *Filter) Handle(handle WebHandle) func(rw http.ResponseWriter, r *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		for path, handle := range f.filterMap {
-			if path == r.RequestURI {
+			if strings.Contains(r.RequestURI, path) {
 				// intercepted the uri and activate the handle
 				err := handle(rw, r)
 				if err != nil {

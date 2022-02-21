@@ -1,5 +1,5 @@
 ## Concurrent-Go-eCommerce
-An eCommerce platform supports high concurrency using Iris framework in Go.
+An eCommerce platform supports high volume of visits using Iris framework in Go.
 
 ### Basic
 1. Used Iris, GORM& MySQL for creating fundamental CRUD services of the eCommerce web app.

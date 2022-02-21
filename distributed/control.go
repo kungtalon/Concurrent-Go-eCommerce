@@ -64,7 +64,7 @@ func (m *AccessControl) SetNewRecord(uid int) {
 	m.RWMutex.Unlock()
 }
 
-func (m *AccessControl) GetDistributedRight(req *http.Request) bool {
+func (m *AccessControl) GetDistributedRight(req *http.Request, productIdStr string) bool {
 	uid, err := req.Cookie("uid")
 	log.Println("Cur uid: " + uid.Value)
 	if err != nil {
@@ -81,7 +81,7 @@ func (m *AccessControl) GetDistributedRight(req *http.Request) bool {
 	if hostRequest == m.localHost {
 		return m.GetDataFromMap(uid.Value)
 	} else {
-		return m.GetDataFromOtherMap(hostRequest, req)
+		return m.GetDataFromOtherMap(hostRequest, req, productIdStr)
 	}
 
 }
@@ -141,8 +141,8 @@ func (m *AccessControl) GetDataFromMap(uid string) bool {
 	return true
 }
 
-func (m *AccessControl) GetDataFromOtherMap(host string, request *http.Request) bool {
-	hostUrl := "http://" + host + ":" + m.port + "/check"
+func (m *AccessControl) GetDataFromOtherMap(host string, request *http.Request, productIdStr string) bool {
+	hostUrl := "http://" + host + ":" + m.port + "/check?productID=" + productIdStr
 	log.Println("Sending check request to " + host)
 	response, body, err := m.GetUrl(hostUrl, request)
 	if err != nil {

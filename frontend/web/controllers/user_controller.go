@@ -79,3 +79,18 @@ func (c *UserController) PostLogin() mvc.Response {
 		Path: "/product",
 	}
 }
+
+func (c *UserController) GetPopulate() {
+	for i := 5; i <= 200; i++ {
+		nickName := "guest" + strconv.Itoa(i)
+		userName := "guest" + strconv.Itoa(i)
+		passWord := "guest" + strconv.Itoa(i)
+		newUser := &datamodels.User{NickName: nickName, UserName: userName, HashPassword: passWord}
+		_, err := c.Service.AddUser(newUser)
+		if err != nil {
+			c.Ctx.Application().Logger().Debug(err)
+		}
+	}
+
+	c.Ctx.Redirect("/user/login")
+}

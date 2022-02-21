@@ -56,12 +56,12 @@ func (u *UserManagerRepository) Insert(user *datamodels.User) (userId uint, err 
 		return
 	}
 
-	var exists bool
-	err = u.mysqlConn.Where("user_name=?", user.UserName).First(&exists).Error
-	if err != nil {
+	record := &datamodels.User{}
+	result := u.mysqlConn.Model(&record).Where("user_name=?", user.UserName).Limit(1).Find(&record)
+	if result.Error != nil {
 		return
 	}
-	if exists {
+	if result.RowsAffected > 0 {
 		return 0, errors.New("User name already exists!")
 	}
 	err = u.mysqlConn.Create(&user).Error

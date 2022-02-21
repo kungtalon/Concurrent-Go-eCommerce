@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var hostArray = []string{"127.0.0.1", "172.23.240.1"}
+var hostArray = []string{"127.0.0.1", "192.168.144.1"}
 
 var localHost = ""
 
@@ -32,16 +32,6 @@ var rabbitmqValidate *distributed.RabbitMQ
 var blackList = &distributed.BlackList{Lookup: make(map[int]bool)}
 
 var accessControl = &distributed.AccessControl{SourcesArray: make(map[int]time.Time), BlackList: blackList}
-
-func CheckUserRight(rw http.ResponseWriter, r *http.Request) {
-	right := accessControl.GetDistributedRight(r)
-	if !right {
-		rw.Write([]byte("false"))
-		return
-	}
-	rw.Write([]byte("true"))
-	return
-}
 
 // Check checks whether the product has sold out
 func Check(rw http.ResponseWriter, r *http.Request) {
@@ -66,7 +56,7 @@ func Check(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// 1. Distributed Authentication
-	right := accessControl.GetDistributedRight(r)
+	right := accessControl.GetDistributedRight(r, productIdStr)
 	if right == false {
 		log.Println("User check failed...")
 		rw.Write(failure)
@@ -170,8 +160,6 @@ func main() {
 
 	filter := common.NewFiler()
 	filter.RegisterFilterUri("/check", Auth)
-	filter.RegisterFilterUri("/checkRight", Auth)
 	http.HandleFunc("/check", filter.Handle(Check))
-	http.HandleFunc("/checkRight", filter.Handle(CheckUserRight))
 	http.ListenAndServe("localhost:8083", nil)
 }

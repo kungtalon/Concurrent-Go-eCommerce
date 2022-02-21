@@ -9,10 +9,10 @@ func main() {
 	app := iris.New()
 
 	// template
-	//templates := iris.HTML("./frontend/web/views", ".html").Layout("shared/layout.html").Reload(true)
+	//templates := iris.HTML("./front/web/views", ".html").Layout("shared/layout.html").Reload(true)
 	//app.RegisterView(templates)
-	app.HandleDir("/public", "./frontend/web/public")
-	app.HandleDir("/html", "./frontend/web/htmlProductShow")
+	app.HandleDir("/public", "./front/web/public")
+	app.HandleDir("/html", "./front/web/htmlProductShow")
 	// app start
 	app.Run(
 		iris.Addr("0.0.0.0:80"),

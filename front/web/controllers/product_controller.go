@@ -23,8 +23,8 @@ type ProductController struct {
 }
 
 var (
-	htmlOutPath  = "./frontend/web/htmlProductShow/" // store generated static html
-	templatePath = "./frontend/web/views/template/"  // static template
+	htmlOutPath  = "./front/web/htmlProductShow/" // store generated static html
+	templatePath = "./front/web/views/template/"  // static template
 )
 
 // GenerateStaticHtml generates static html

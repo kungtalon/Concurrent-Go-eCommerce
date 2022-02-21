@@ -162,7 +162,7 @@ func main() {
 	rabbitmqValidate = distributed.NewRabbitMQSimple(common.AMQP_QUEUE_NAME)
 	defer rabbitmqValidate.Destroy()
 
-	http.Handle("/html/", http.StripPrefix("/html", http.FileServer(http.Dir("./frontend/web/htmlProductShow"))))
+	http.Handle("/html/", http.StripPrefix("/html", http.FileServer(http.Dir("./front/web/htmlProductShow"))))
 	http.Handle("/public/", http.StripPrefix("/public", http.FileServer(http.Dir(common.CDN_DOMAIN_URL))))
 
 	filter := common.NewFiler()

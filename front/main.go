@@ -8,8 +8,8 @@ import (
 	"jzmall/common"
 	"jzmall/datamodels"
 	"jzmall/distributed"
-	"jzmall/frontend/middleware"
-	"jzmall/frontend/web/controllers"
+	"jzmall/front/middleware"
+	"jzmall/front/web/controllers"
 	"jzmall/repositories"
 	"jzmall/services"
 )
@@ -21,12 +21,12 @@ func main() {
 	log := app.Logger()
 	log.SetLevel("debug")
 	// template
-	templates := iris.HTML("./frontend/web/views", ".html").Layout("shared/layout.html").Reload(true)
+	templates := iris.HTML("./front/web/views", ".html").Layout("shared/layout.html").Reload(true)
 	app.RegisterView(templates)
 	// set up template targets
-	//app.HandleDir("/public", "./frontend/web/public")
+	//app.HandleDir("/public", "./front/web/public")
 	app.HandleDir("/public", common.CDN_DOMAIN_URL+"/public")
-	//app.HandleDir("/html", "./frontend/web/htmlProductShow")
+	//app.HandleDir("/html", "./front/web/htmlProductShow")
 	app.OnAnyErrorCode(func(ctx iris.Context) {
 		ctx.ViewData("message", ctx.Values().GetStringDefault("message", "An error Occurred..."))
 		ctx.ViewLayout("")

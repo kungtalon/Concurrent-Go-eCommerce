@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/kataras/iris/v12"
-	"jzmall/backend/web/controllers"
+	"jzmall/admin/web/controllers"
 	"jzmall/common"
 	"jzmall/datamodels"
 	"jzmall/repositories"
@@ -19,11 +19,11 @@ func main() {
 	log := app.Logger()
 	log.SetLevel("debug")
 	// template
-	templates := iris.HTML("./backend/web/views", ".html").Layout("shared/layout.html").Reload(true)
+	templates := iris.HTML("./admin/web/views", ".html").Layout("shared/layout.html").Reload(true)
 	app.RegisterView(templates)
 	// set up template targets
 	app.HandleDir("/assets", common.CDN_DOMAIN_URL+"/assets")
-	//app.HandleDir("/assets", "./backend/web/assets")
+	//app.HandleDir("/assets", "./admin/web/assets")
 	app.OnAnyErrorCode(func(ctx iris.Context) {
 		ctx.ViewData("message", ctx.Values().GetStringDefault("message", "Error Occurred..."))
 		ctx.ViewLayout("")

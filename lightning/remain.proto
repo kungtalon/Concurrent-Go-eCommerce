@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "lightning/proto";
+
+package remain;
+
+// The check product remains service definition.
+service CheckRemains {
+  // Try to get one product, the count should reduce by one
+  rpc TryGetOne (GetOneRequest) returns (GetOneReply) {}
+}
+
+// The request message containing the productID
+message GetOneRequest {
+  string productId = 1;
+}
+
+// The response message containing whether the product has remain
+message GetOneReply {
+  string remaining = 1;
+}

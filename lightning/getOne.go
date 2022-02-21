@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"google.golang.org/grpc"
+	pb "jzmall/lightning/proto"
 	"log"
-	"net/http"
+	"net"
 	"sync"
 )
 
@@ -14,6 +16,10 @@ var productNum int64 = 10000
 
 // mutual exclusive lock
 var mutex sync.Mutex
+
+type server struct {
+	pb.UnimplementedCheckRemainsServer
+}
 
 func GetOneProduct() bool {
 	mutex.Lock()
@@ -26,20 +32,23 @@ func GetOneProduct() bool {
 	return false
 }
 
-func GetProduct(rw http.ResponseWriter, req *http.Request) {
+// TryGetOne is an implementation of the predefined gRPC interface
+func (s *server) TryGetOne(ctx context.Context, in *pb.GetOneRequest) (*pb.GetOneReply, error) {
+	log.Printf("ProtoBuf Received: %v", in.GetProductId())
 	if GetOneProduct() {
-		fmt.Println("Get One Successful!")
-		rw.Write([]byte("true"))
-		return
+		return &pb.GetOneReply{Remaining: "true"}, nil
 	}
-	fmt.Println("Get One failed!")
-	rw.Write([]byte("false"))
+	return &pb.GetOneReply{Remaining: "false"}, nil
 }
 
 func main() {
-	http.HandleFunc("/getOne", GetProduct)
-	err := http.ListenAndServe(":8084", nil)
+	lis, err := net.Listen("tcp", ":8084")
 	if err != nil {
-		log.Fatal("Err: ", err)
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	pb.RegisterCheckRemainsServer(s, &server{})
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
 	}
 }

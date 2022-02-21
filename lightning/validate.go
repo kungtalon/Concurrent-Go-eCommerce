@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"jzmall/common"
 	"jzmall/datamodels"
 	"jzmall/distributed"
+	pb "jzmall/lightning/proto"
 	"log"
 	"net/http"
 	"net/url"
@@ -14,7 +17,10 @@ import (
 	"time"
 )
 
-var hostArray = []string{"127.0.0.1", "192.168.144.1"}
+var hostArray = []string{
+	"127.0.0.1",
+	"192.168.144.1",
+}
 
 var localHost = ""
 
@@ -63,15 +69,8 @@ func Check(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 2. Get the control of product number, avoid oversale
-	hostUrl := "http://" + GetOneIp + ":" + GetOnePort + "/getOne"
-	responseValidate, validateBody, err := accessControl.GetUrl(hostUrl, r)
-	if err != nil {
-		log.Println("Failed to get response from access control")
-		rw.Write(failure)
-		return
-	}
-	// check the count control service statuscode
-	if responseValidate.StatusCode != 200 || string(validateBody) != "true" {
+	getOneSuccess := accessControl.CallGetOne(productIdStr)
+	if getOneSuccess != "true" {
 		log.Println("Response is not expected...")
 		rw.Write(failure)
 		return
@@ -149,8 +148,16 @@ func main() {
 	localHost = localIp
 	log.Println("LocalHost = " + localHost)
 
+	conn, err := grpc.Dial(GetOneIp+":"+GetOnePort, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Did not connect: %v", err)
+	}
+	defer conn.Close()
+	client := pb.NewCheckRemainsClient(conn)
+
 	accessControl.SetHosts(localHost, port)
 	accessControl.SetConsistentHash(hashConsistent)
+	accessControl.SetGRPC(client)
 
 	rabbitmqValidate = distributed.NewRabbitMQSimple(common.AMQP_QUEUE_NAME)
 	defer rabbitmqValidate.Destroy()

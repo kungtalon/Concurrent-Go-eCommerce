@@ -1,7 +1,9 @@
 package distributed
 
 import (
+	"context"
 	"io/ioutil"
+	pb "jzmall/lightning/proto"
 	"log"
 	"net/http"
 	"strconv"
@@ -20,6 +22,7 @@ type AccessControl struct {
 	port      string
 	hashCon   *Consistent
 	BlackList *BlackList
+	Client    pb.CheckRemainsClient
 	sync.RWMutex
 }
 
@@ -48,6 +51,10 @@ func (m *AccessControl) SetHosts(localHost string, port string) {
 
 func (m *AccessControl) SetConsistentHash(consistent *Consistent) {
 	m.hashCon = consistent
+}
+
+func (m *AccessControl) SetGRPC(client pb.CheckRemainsClient) {
+	m.Client = client
 }
 
 func (m *AccessControl) GetNewRecord(uid int) time.Time {
@@ -155,4 +162,15 @@ func (m *AccessControl) GetDataFromOtherMap(host string, request *http.Request, 
 		}
 	}
 	return false
+}
+
+func (m *AccessControl) CallGetOne(productIdStr string) string {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	r, err := m.Client.TryGetOne(ctx, &pb.GetOneRequest{ProductId: productIdStr})
+	if err != nil {
+		log.Fatalf("could not greet: %v", err)
+	}
+	return r.GetRemaining()
 }

@@ -8,7 +8,14 @@ An eCommerce platform supports high concurrency using Iris framework in Go.
 4. Used gRPC for communicating between services during authentication.
 
 ### Structure
-To be updated.
+admin: administrative dashboard for sellers.
+common: utilitary tools, including reading cookie, conneting to database, preprocessing filter and consts.
+datamodels: data models defined with gorm.Model.
+distributed: tools for distributed authentication, including consistent hash and rabbitmq.
+front: main web app with user interface.
+lightning: main services for distributed user identification and product number validation.
+repositories: create, read, update, delete (CRUD) functions implemented with gorm.
+services: APIs for interacting with database built on repositories functions.
 
 ### Q & A
 To be updated.
